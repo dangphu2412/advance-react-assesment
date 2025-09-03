@@ -1,4 +1,4 @@
-import {NextButton, PreviousButton} from "./next.tsx";
+import {NextButton, PreviousButton} from "./navigator.tsx";
 import type {PropsWithChildren} from "react";
 
 export function Header({ children }: PropsWithChildren) {
