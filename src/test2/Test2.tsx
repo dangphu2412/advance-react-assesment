@@ -37,7 +37,7 @@ export default function Test2() {
         'yellow': 'border-yellow-500',
     }
 
-    return <div className={'w-[600px] grid grid-cols-2 gap-4 border border-gray-300 p-4'}>
+    return <div className={'w-[600px] grid grid-cols-2 gap-4 border border-gray-300 p-4 mx-auto mt-4'}>
         <Header>
             This is test2
         </Header>

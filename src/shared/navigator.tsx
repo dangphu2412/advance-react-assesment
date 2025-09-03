@@ -17,7 +17,6 @@ const linkedList: LinkedNode = {
 export function NextButton() {
     const currentPath = window.location.pathname;
 
-
     function getNext() {
         let current = linkedList;
 
