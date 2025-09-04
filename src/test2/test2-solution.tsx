@@ -29,7 +29,7 @@ const data: Card[] = [
     }
 ]
 
-export default function Test2() {
+export default function Test2Solution() {
     const [cards, setCards] = useState<Card[]>(data);
     const [isAddCardModalOpen, setIsAddCardModalOpen] = useState(false);
     const tagToColor = {
@@ -49,7 +49,7 @@ export default function Test2() {
                 return <div className={'border border-black rounded p-4 flex flex-col gap-2'} key={index}>
                     <div className={'flex justify-between'}>
                         {card.name}
-                        <span className={'border rounded w-8 text-center cursor-pointer'}>
+                        <span onClick={() => setCards(cards.filter((c) => c.id !== card.id))} className={'border rounded w-8 text-center cursor-pointer'}>
                             -
                         </span>
                     </div>
