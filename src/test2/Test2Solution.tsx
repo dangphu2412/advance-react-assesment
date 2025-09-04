@@ -40,7 +40,10 @@ export function Test2Solution({ onClose, onSubmit }: ItemModal) {
       className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
       onClick={onClose}
     >
-      <div className="bg-white p-6 rounded-xl shadow-lg min-w-[400px]">
+      <div
+        className="bg-white p-6 rounded-xl shadow-lg min-w-[400px]"
+        onClick={(e) => e.stopPropagation()}
+      >
         <h2 className="text-lg font-semibold mb-4">Fill Item Data</h2>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
