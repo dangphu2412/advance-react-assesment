@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Header } from "../shared/header.tsx";
+import { createPortal } from "react-dom";
 
 type Card = {
   id: number;
@@ -28,7 +29,7 @@ const data: Card[] = [
   },
 ];
 
-export default function Test2() {
+export default function Test2SolutionBai1() {
   const [cards, setCards] = useState<Card[]>(data);
   const tagToColor = {
     red: "border-red-500",
@@ -50,7 +51,7 @@ export default function Test2() {
           return (
             <div
               className={"border border-black rounded p-4 flex flex-col gap-2"}
-              key={index}
+              key={card.id}
             >
               <div className={"flex justify-between"}>
                 {card.name}
@@ -82,7 +83,7 @@ export default function Test2() {
           );
         })}
 
-        <AddCard />
+        <AddCard setCards={setCards} />
       </div>
 
       <q className={"col-span-2"}>
@@ -119,20 +120,95 @@ export default function Test2() {
   );
 }
 
-function AddCard() {
+function AddCard({
+  setCards,
+}: {
+  setCards: React.Dispatch<React.SetStateAction<Card[]>>;
+}) {
+  const [isModalShow, setIsModalShow] = useState(false);
   return (
-    <div
-      className={
-        "border border-black rounded p-4 flex flex-col gap-2 hover:bg-gray-500"
-      }
-    >
-      <span
+    <>
+      <div
         className={
-          "text-2xl cursor-pointer w-full h-full flex justify-center items-center"
+          "border border-black rounded p-4 flex flex-col gap-2 hover:bg-gray-500"
         }
+        onClick={() => setIsModalShow(true)}
       >
-        +
-      </span>
+        <span
+          className={
+            "text-2xl cursor-pointer w-full h-full flex justify-center items-center"
+          }
+        >
+          +
+        </span>
+      </div>
+      {isModalShow &&
+        createPortal(
+          <Modal onClose={() => setIsModalShow(false)} setCards={setCards} />,
+          document.body
+        )}
+    </>
+  );
+}
+
+function Modal({
+  onClose,
+  setCards,
+}: {
+  onClose: () => void;
+  setCards: React.Dispatch<React.SetStateAction<Card[]>>;
+}) {
+  const [card, setCard] = useState<Card>({
+    id: 0,
+    name: "",
+    description: "",
+    tags: [],
+  });
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    setCards((prev) => [
+      ...prev,
+      {
+        ...card,
+        id: prev.length > 0 ? Math.max(...prev.map((c) => c.id)) + 1 : 1,
+      },
+    ]);
+    onClose();
+    setCard({ id: 0, name: "", description: "", tags: [] });
+  }
+
+  return (
+    <div className="fixed flex flex-col top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border border-black bg-white p-4 z-50">
+      <div>I'm a modal dialog</div>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          placeholder="Name"
+          value={card.name}
+          onChange={(e) => setCard({ ...card, name: e.target.value })}
+        />
+        <textarea
+          placeholder="Description"
+          value={card.description}
+          onChange={(e) => setCard({ ...card, description: e.target.value })}
+        />
+        <select
+          value={card.tags[0] || ""}
+          onChange={(e) => setCard({ ...card, tags: [e.target.value] })}
+        >
+          <option value="">Select a tag</option>
+          <option value="red">Red</option>
+          <option value="blue">Blue</option>
+          <option value="green">Green</option>
+          <option value="yellow">Yellow</option>
+        </select>
+        <button type="submit">Add Card</button>
+      </form>
+      <button type="button" onClick={onClose}>
+        Close
+      </button>
     </div>
   );
 }
