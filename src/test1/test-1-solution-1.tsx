@@ -1,34 +1,10 @@
-import { useSyncExternalStore } from "react";
+import { useRef } from "react";
 import { Header } from "../shared/header.tsx";
-
-let state = {
-    username: "asd",
-    password: "asd",
-}
-const listener = [] as Array<() => void>;
+import { submit } from "./test1-api.ts";
 
 export default function Test1() {
-    const store = {
-        subscribe: (onStoreChange: () => void) => {
-            console.log(onStoreChange)
-            listener.push(onStoreChange);
-            return () => listener.filter(l => l !== onStoreChange);
-        },
-        getSnapshot: () =>  state,
-        setUserName: (username: string) => {
-            state = { ...state, username };
-            listener.forEach(l => l());
-        },
-        setPassword: (password: string) => {
-            state = { ...state, password };
-            listener.forEach(l => l());
-        }
-    }
-
-    const formState = useSyncExternalStore(
-        store.subscribe,
-        store.getSnapshot,
-    )
+    const userInput = useRef<HTMLInputElement>(null);
+    const passInput = useRef<HTMLInputElement>(null);
 
     return <form className={'w-[600px] grid grid-cols-2 gap-4 border border-gray-300 p-4 mx-auto mt-12'}>
         <Header>
@@ -36,16 +12,21 @@ export default function Test1() {
         </Header>
 
         <label htmlFor={'username'}>
-            formState.username: {formState.username}
+            Username
         </label>
-        <input className={'border border-solid'} id={'username'} name={'username'} placeholder={'Type username'} value={formState.username} onChange={(e) => store.setUserName(e.target.value)} />
+        <input className={'border border-solid'} id={'username'} name={'username'} placeholder={'Type username'} ref={userInput} />
 
         <label htmlFor={'password'}>
-            formState.password: {formState.password}
+            Password
         </label>
-        <input className={'border border-solid'} id={'password'} name={'password'} type={'password'} value={formState.password} onChange={(e) => store.setPassword(e.target.value)} />
+        <input className={'border border-solid'} id={'password'} name={'password'} type={'password'} ref={passInput} />
 
-        <button className={'border rounded col-span-2 cursor-pointer p-2'}>
+        <button className={'border rounded col-span-2 cursor-pointer p-2'} onClick={(e) => {
+            e.preventDefault();
+            const username = userInput.current?.value || '';
+            const password = passInput.current?.value || '';
+            submit({ username, password });
+        }}>
             Login
         </button>
 

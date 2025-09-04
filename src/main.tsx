@@ -1,19 +1,23 @@
 import './main.css';
-import {createRoot} from 'react-dom/client'
-import {BrowserRouter, Route, Routes} from "react-router";
-import {Home} from "./Home.tsx";
-import Test1 from './test1/Test1.tsx';
-import Test2 from './test2/Test2.tsx';
-import Test3 from './test3/Test3.tsx';
+import { createRoot } from 'react-dom/client'
+import { BrowserRouter, Route, Routes } from "react-router";
+import { Home } from "./Home.tsx";
+import { lazy, Suspense } from 'react';
+
+const LazyTest1 = lazy(() => import('./test1/Test1.tsx'));
+const LazyTest2 = lazy(() => import('./test2/test-3-solution.tsx'));
+const LazyTest3 = lazy(() => import('./test3/Test3.tsx'));
 
 createRoot(document.getElementById('root')!).render(
     <BrowserRouter>
-        <Routes>
-            <Route path="/test1" element={<Test1 />} />
-            <Route path="/test2" element={<Test2 />} />
-            <Route path="/test3" element={<Test3 />} />
-            <Route path="/" element={<Home />} />
-        </Routes>
+        <Suspense fallback={<div>Loading...</div>}>
+            <Routes>
+                <Route path="/test1" element={<LazyTest1 />} />
+                <Route path="/test2" element={<LazyTest2 />} />
+                <Route path="/test3" element={<LazyTest3 />} />
+                <Route path="/" element={<Home />} />
+            </Routes>
+        </Suspense>
     </BrowserRouter>,
 
 )

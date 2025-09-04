@@ -1,49 +1,28 @@
-import { useSyncExternalStore } from "react";
-import { Header } from "../shared/header.tsx";
-
-let state = {
-    username: "asd",
-    password: "asd",
-}
-const listener = [] as Array<() => void>;
+import {useState} from "react";
+import {Header} from "../shared/header.tsx";
 
 export default function Test1() {
-    const store = {
-        subscribe: (onStoreChange: () => void) => {
-            console.log(onStoreChange)
-            listener.push(onStoreChange);
-            return () => listener.filter(l => l !== onStoreChange);
-        },
-        getSnapshot: () =>  state,
-        setUserName: (username: string) => {
-            state = { ...state, username };
-            listener.forEach(l => l());
-        },
-        setPassword: (password: string) => {
-            state = { ...state, password };
-            listener.forEach(l => l());
-        }
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+
+    function handleSubmit() {
+        // do not thing
     }
 
-    const formState = useSyncExternalStore(
-        store.subscribe,
-        store.getSnapshot,
-    )
-
-    return <form className={'w-[600px] grid grid-cols-2 gap-4 border border-gray-300 p-4 mx-auto mt-12'}>
+    return <form action={handleSubmit} className={'w-[600px] grid grid-cols-2 gap-4 border border-gray-300 p-4 mx-auto mt-12'}>
         <Header>
             This is test1
         </Header>
 
         <label htmlFor={'username'}>
-            formState.username: {formState.username}
+            Username
         </label>
-        <input className={'border border-solid'} id={'username'} name={'username'} placeholder={'Type username'} value={formState.username} onChange={(e) => store.setUserName(e.target.value)} />
+        <input className={'border border-solid'} id={'username'} name={'username'} placeholder={'Type username'} value={username} onChange={(e) => setUsername(e.target.value)} />
 
         <label htmlFor={'password'}>
-            formState.password: {formState.password}
+            Password
         </label>
-        <input className={'border border-solid'} id={'password'} name={'password'} type={'password'} value={formState.password} onChange={(e) => store.setPassword(e.target.value)} />
+        <input className={'border border-solid'} id={'password'} name={'password'} type={'password'} value={password} onChange={(e) => setPassword(e.target.value)} />
 
         <button className={'border rounded col-span-2 cursor-pointer p-2'}>
             Login
@@ -73,6 +52,9 @@ export default function Test1() {
 
         <q className={'col-span-2'}>
             Hãy giải thích về nguyên lý vì sao bạn chặn được hành vy load lại trang, dựa trên nguyên lý gì?
+
+            React Form tự động chạy action của form khi nhấn vào một button - gửi một request đến server. 
+            Khi ta truyền vào action một function, function đó sẽ được gọi khi form được submit.
             {/*Hãy comment ở đây*/}
         </q>
     </form>

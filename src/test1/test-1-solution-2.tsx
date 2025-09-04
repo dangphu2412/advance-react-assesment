@@ -1,53 +1,39 @@
-import { useSyncExternalStore } from "react";
+import { useState } from "react";
 import { Header } from "../shared/header.tsx";
+import { submit } from "./test1-api.ts";
 
-let state = {
-    username: "asd",
-    password: "asd",
+function Form() {
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+    
+    return <>
+        <label htmlFor={'username'}>
+            Username
+        </label>
+        <input className={'border border-solid'} id={'username'} name={'username'} placeholder={'Type username'} value={username} onChange={(e) => setUsername(e.target.value)} />
+
+        <label htmlFor={'password'}>
+            Password
+        </label>
+        <input className={'border border-solid'} id={'password'} name={'password'} type={'password'} value={password} onChange={(e) => setPassword(e.target.value)} />
+
+        <button className={'border rounded col-span-2 cursor-pointer p-2'} onClick={(e) => {
+            e.preventDefault();
+            submit({ username, password });
+        }}>
+            Login
+        </button>
+    </>
 }
-const listener = [] as Array<() => void>;
+
 
 export default function Test1() {
-    const store = {
-        subscribe: (onStoreChange: () => void) => {
-            console.log(onStoreChange)
-            listener.push(onStoreChange);
-            return () => listener.filter(l => l !== onStoreChange);
-        },
-        getSnapshot: () =>  state,
-        setUserName: (username: string) => {
-            state = { ...state, username };
-            listener.forEach(l => l());
-        },
-        setPassword: (password: string) => {
-            state = { ...state, password };
-            listener.forEach(l => l());
-        }
-    }
-
-    const formState = useSyncExternalStore(
-        store.subscribe,
-        store.getSnapshot,
-    )
-
     return <form className={'w-[600px] grid grid-cols-2 gap-4 border border-gray-300 p-4 mx-auto mt-12'}>
         <Header>
             This is test1
         </Header>
 
-        <label htmlFor={'username'}>
-            formState.username: {formState.username}
-        </label>
-        <input className={'border border-solid'} id={'username'} name={'username'} placeholder={'Type username'} value={formState.username} onChange={(e) => store.setUserName(e.target.value)} />
-
-        <label htmlFor={'password'}>
-            formState.password: {formState.password}
-        </label>
-        <input className={'border border-solid'} id={'password'} name={'password'} type={'password'} value={formState.password} onChange={(e) => store.setPassword(e.target.value)} />
-
-        <button className={'border rounded col-span-2 cursor-pointer p-2'}>
-            Login
-        </button>
+        <Form />
 
         <q className={'col-span-2'}>
             Test 1 - bài 1: mỗi lần thay đổi value của username hoặc password đều làm component này re-render.
