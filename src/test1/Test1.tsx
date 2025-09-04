@@ -47,8 +47,10 @@ export default function Test1() {
         </q>
 
         <q className={'col-span-2'}>
-            Hãy giải thích về nguyên lý vì sao bạn chặn được hành vy load lại trang, dựa trên nguyên lý gì?
+            Hãy giải thích về nguyên lý vì sao bạn chặn được hành vi load lại trang, dựa trên nguyên lý gì?
             {/*Hãy comment ở đây*/}
+            {/* Khi bấm nút submit thì sự kiện onSubmit của thẻ form sẽ được gọi => reload và gửi dữ liệu qua URL hoặc body).
+            Để ngăn chặn hành vi này, có thể gọi event.preventDefault() trong hàm onSubmit để ngăn chặn hành vi mặc định của trình duyệt là load lại trang và chủ động xử lí logic theo ý muốn */}
         </q>
     </form>
 }
