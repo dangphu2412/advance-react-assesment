@@ -1,7 +1,7 @@
 import {useEffect, useState} from "react";
 import {Header} from "../shared/header.tsx";
-import {openDB} from "./db.ts";
-import {getTasks, type Task} from "./api.ts";
+import {clean, getAll, openDB, put, QUEUE_STORE, TASK_STORE} from "./db.ts";
+import {getTasks, saveTasks, type Task} from "./api.ts";
 import {createPortal} from "react-dom";
 
 type Card = {
@@ -40,12 +40,39 @@ export default function Test2() {
         'yellow': 'border-yellow-500',
     }
 
+    function save(task: Task) {
+        setTasks(prevState => [...prevState, task]);
+
+        if (navigator.onLine) {
+            saveTasks([task]);
+            return;
+        }
+
+        put(TASK_STORE, task);
+        put(QUEUE_STORE, task);
+    }
+
     useEffect(() => {
         (async () => {
             openDB()
             const stored = await getTasks();
             setTasks(stored);
         })();
+    }, []);
+
+    useEffect(() => {
+        async function sync() {
+            const pendingTasks = await getAll(QUEUE_STORE);
+            await saveTasks(pendingTasks);
+            setTasks(clone => [...clone])
+            await clean(QUEUE_STORE);
+        }
+
+        window.addEventListener('online', sync);
+
+        return () => {
+            window.removeEventListener('online', sync);
+        }
     }, []);
 
     return <div className={'w-[600px] grid grid-cols-2 gap-4 border border-gray-300 p-4 mx-auto mt-4'}>
@@ -75,12 +102,12 @@ export default function Test2() {
                 </div>
             })}
 
-            <AddCard />
+            <AddCard onSave={save}/>
         </div>
     </div>
 }
 
-function AddCard() {
+function AddCard({ onSave }: { onSave: (task: Task) => void }) {
     const [isOpen, setIsOpen] = useState(false);
 
     return <>
@@ -89,7 +116,7 @@ function AddCard() {
         </div>
 
         {isOpen && (
-            <TaskPortal onClose={() => setIsOpen(false)} onSave={() => {}}/>
+            <TaskPortal onClose={() => setIsOpen(false)} onSave={onSave}/>
         )}
     </>
 }

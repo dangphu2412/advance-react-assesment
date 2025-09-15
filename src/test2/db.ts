@@ -1,6 +1,6 @@
 const DB_NAME = "taskDB";
 export const TASK_STORE = "tasks";
-const QUEUE_STORE = "queue";
+export const QUEUE_STORE = "queue";
 
 export function openDB() {
     return new Promise<IDBDatabase>((resolve, reject) => {
@@ -16,6 +16,7 @@ export function openDB() {
 }
 
 export async function put(store: string, value: any) {
+    console.log(`Storing to indexexdb ${store}`, value);
     const db = await openDB();
     const tx = db.transaction(store, "readwrite");
     tx.objectStore(store).put(value);
@@ -30,4 +31,15 @@ export async function getAll(store: string) {
         req.onsuccess = () => resolve(req.result);
         req.onerror = () => reject(req.error);
     });
+}
+
+export async function clean(store: string) {
+        console.log(`Cleaning to indexexdb ${store}`);
+
+        const db = await openDB();
+        const tx = db.transaction(store, "readwrite");
+
+        tx.objectStore(store).clear();
+        tx.commit();
+        console.log(`Cleaned indexexdb ${store}`);
 }
