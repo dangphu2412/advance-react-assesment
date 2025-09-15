@@ -1,5 +1,8 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {Header} from "../shared/header.tsx";
+import {openDB} from "./db.ts";
+import {getTasks, type Task} from "./api.ts";
+import {createPortal} from "react-dom";
 
 type Card = {
     id: number;
@@ -29,13 +32,21 @@ const data: Card[] = [
 ]
 
 export default function Test2() {
-    const [cards, setCards] = useState<Card[]>(data);
+    const [cards, setTasks] = useState<Card[]>(data);
     const tagToColor = {
         'red': 'border-red-500',
         'blue': 'border-blue-500',
         'green': 'border-green-500',
         'yellow': 'border-yellow-500',
     }
+
+    useEffect(() => {
+        (async () => {
+            openDB()
+            const stored = await getTasks();
+            setTasks(stored);
+        })();
+    }, []);
 
     return <div className={'w-[600px] grid grid-cols-2 gap-4 border border-gray-300 p-4 mx-auto mt-4'}>
         <Header>
@@ -66,38 +77,94 @@ export default function Test2() {
 
             <AddCard />
         </div>
-
-        <q className={'col-span-2'}>
-            Test 2 - bài 1: tạo 1 form dưới dạng modal sử dụng react portal khởi tạo nằm ngay dưới thẻ body.
-            Bao gồm các fields theo Card model và hiển thị ra màn hình sau khi tạo xong.
-            Sau khi đóng form và mở lên lại, không nên thấy các giá trị củ.
-        </q>
-
-        <q className={'col-span-2'}>
-            Cách thức làm bài: tạo ra 1 component trong thư mục test2/test1-solution.tsx.
-        </q>
-
-        <q className={'col-span-2'}>
-            Test 2 - bài 2: Triển khai tính năng xoá
-        </q>
-
-        <q className={'col-span-2'}>
-            Cách thức làm bài: tạo ra 1 component trong thư mục test2/test2-solution.tsx.
-        </q>
-
-        <q className={'col-span-2'}>
-            Test 2 - bài 3: Anh đang xử dụng index làm key của children khi render list các phần tử của mảng.
-            Vậy thì có vấn đề gì xảy ra khi xử dụng index làm key? Hãy triển khai ví dụ cụ thể và giải thích cỡ chế hoạt động key trong react, sự liên quan giữa react key, DOM ảo, DOM thật?
-        </q>
-
-        <q className={'col-span-2'}>
-            Cách thức làm bài: tạo ra 1 component trong thư mục test2/test3-solution.tsx.
-        </q>
     </div>
 }
 
 function AddCard() {
-    return <div className={'border border-black rounded p-4 flex flex-col gap-2 hover:bg-gray-500'}>
-        <span className={'text-2xl cursor-pointer w-full h-full flex justify-center items-center'}>+</span>
-    </div>
+    const [isOpen, setIsOpen] = useState(false);
+
+    return <>
+        <div className={'border border-black rounded p-4 flex flex-col gap-2 hover:bg-gray-500'} onClick={() => setIsOpen(!isOpen)}>
+            <span className={'text-2xl cursor-pointer w-full h-full flex justify-center items-center'}>+</span>
+        </div>
+
+        {isOpen && (
+            <TaskPortal onClose={() => setIsOpen(false)} onSave={() => {}}/>
+        )}
+    </>
+}
+
+type TaskPortalProps = { onClose: () => void, onSave: (task: Task) => void };
+function TaskPortal({ onClose, onSave }: TaskPortalProps) {
+    const [name, setName] = useState("");
+    const [description, setDescription] = useState("");
+    const [tags, setTags] = useState("");
+
+    const handleSave = () => {
+        const task: Task = {
+            id: Date.now(),
+            name,
+            description,
+            tags: tags.split(",").map((t) => t.trim()).filter(Boolean),
+        };
+        onSave(task);
+        onClose();
+        setName("");
+        setDescription("");
+        setTags("");
+    };
+
+    return createPortal(
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-xl shadow-xl w-[400px]">
+                <h2 className="text-lg font-semibold mb-4">Add Task</h2>
+
+                <label className="block mb-2">
+                    <span className="text-sm">Name</span>
+                    <input
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="w-full border px-2 py-1 rounded mt-1"
+                        placeholder="Task name"
+                    />
+                </label>
+
+                <label className="block mb-2">
+                    <span className="text-sm">Description</span>
+                    <textarea
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        className="w-full border px-2 py-1 rounded mt-1"
+                        placeholder="Task description"
+                    />
+                </label>
+
+                <label className="block mb-4">
+                    <span className="text-sm">Tags (comma separated)</span>
+                    <input
+                        value={tags}
+                        onChange={(e) => setTags(e.target.value)}
+                        className="w-full border px-2 py-1 rounded mt-1"
+                        placeholder="work, urgent, personal"
+                    />
+                </label>
+
+                <div className="flex justify-end gap-2">
+                    <button
+                        onClick={onClose}
+                        className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        onClick={handleSave}
+                        className="px-3 py-1 rounded bg-blue-600 text-white hover:bg-blue-700"
+                    >
+                        Save
+                    </button>
+                </div>
+            </div>
+        </div>,
+        document.body
+    );
 }
